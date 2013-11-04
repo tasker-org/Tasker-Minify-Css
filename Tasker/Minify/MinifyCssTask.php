@@ -7,17 +7,14 @@
  */
 namespace Tasker\Minify;
 
-use Tasker\Setters\IRootPathSetter;
-use Tasker\Tasks\ITaskService;
 use Tasker\Concat\IConcatFiles;
 use Tasker\Concat\ConcatFiles;
 use Tasker\InvalidStateException;
+use Tasker\Tasks\Task;
 use Tasker\Utils\FileSystem;
 
-class MinifyCssTask implements ITaskService, IRootPathSetter
+class MinifyCssTask extends Task
 {
-
-	private $root;
 
 	/** @var IConcatFiles  */
 	private $concatFiles;
@@ -35,21 +32,11 @@ class MinifyCssTask implements ITaskService, IRootPathSetter
 	}
 
 	/**
-	 * @param string $root
-	 * @return $this
-	 */
-	public function setRootPath($root)
-	{
-		$this->root = (string) $root;
-		return $this;
-	}
-
-	/**
 	 * @param array $config
 	 * @return array|mixed
 	 * @throws \Tasker\InvalidStateException
 	 */
-	public function run(array $config)
+	public function run($config)
 	{
 		$results = array();
 		if(count($config)) {
@@ -72,10 +59,15 @@ class MinifyCssTask implements ITaskService, IRootPathSetter
 		return $results;
 	}
 
+	/**
+	 * @param $files
+	 * @param $dest
+	 * @return int
+	 */
 	protected function process($files, $dest)
 	{
-		$content = $this->getMinified($this->concatFiles->getFilesContent($files, $this->root));
-		return FileSystem::write($this->root . DIRECTORY_SEPARATOR . $dest, $content);
+		$content = $this->getMinified($this->concatFiles->getFilesContent($files, $this->setting->getRootPath()));
+		return FileSystem::write($this->setting->getRootPath() . DIRECTORY_SEPARATOR . $dest, $content);
 	}
 
 	/**
